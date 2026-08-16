@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My Wardrobe Outfit Builder</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#111;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#fff;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:5}
+h1{font-size:21px;margin:0}.sub{font-size:12px;color:#666;margin-top:4px}
+main{max-width:900px;margin:auto;padding:14px}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tabs button{white-space:nowrap}
+button,select{font:inherit;border:1px solid #ccc;border-radius:10px;background:#fff;padding:9px 11px}
+button.active{background:#111;color:#fff}.add{float:right}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+label{font-size:10px;color:#666}.filter{background:#fff;border:1px solid #ddd;border-radius:12px;padding:7px}.filter select{width:100%;margin-top:3px}
+#count{font-size:12px;color:#666;margin:10px 2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.card{background:#fff;border:1px solid #ddd;border-radius:16px;padding:10px}
+.card h3{font-size:13px;margin:0 0 8px}
+.line{display:flex;flex-direction:column;align-items:center}.piece{width:100%;text-align:center;background:#fafafa;border-radius:10px;padding:6px;border:1px solid #eee}
+.piece img{width:100%;height:125px;object-fit:contain;border-radius:7px;background:#fff}.name{font-size:11px;font-weight:600;margin-top:4px}.arrow{color:#aaa;margin:2px}
+.options{font-size:10px;color:#666;margin-top:7px;text-align:center;line-height:1.5}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}
+.box{background:#fff;border-radius:16px;padding:16px;width:min(460px,100%)}.box input,.box select{width:100%;margin:5px 0 12px}
+.actions{display:flex;justify-content:flex-end;gap:7px}
+@media(max-width:600px){.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+</style>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#111111"></head>
+<body>
+<header><h1>👕 My Wardrobe Outfit Builder</h1><div class="sub">Choose a top or bottom and see every clothing combination.</div></header>
+<main>
+<div class="tabs">
+<button id="bt" class="active">Top</button><button id="bb">Bottom</button><button id="ba">All</button>
+<button class="add" id="add">＋ Add clothing</button>
+</div>
+<div class="filters">
+<div class="filter" id="tf"><label>TOP</label><select id="top"></select></div>
+<div class="filter" id="bf"><label>BOTTOM</label><select id="bottom"></select></div>
+<div class="filter"><label>SHOES</label><select id="shoe"></select></div>
+<div class="filter"><label>WATCH</label><select id="watch"></select></div>
+<div class="filter"><label>KADA / BRACELET</label><select id="kada"></select></div>
+<div class="filter"><label>EXTRA</label><select id="extra"></select></div>
+</div>
+<div id="count"></div><div id="grid" class="grid"></div>
+</main>
+<div id="modal" class="modal"><div class="box">
+<h2>Add new item</h2>
+<label>Name</label><input id="nm" placeholder="e.g. Blue hoodie">
+<label>Category</label><select id="cat"><option value="tops">Top</option><option value="bottoms">Bottom</option><option value="shoes">Shoes</option><option value="watches">Watch</option><option value="kadas">Kada / bracelet</option><option value="caps">Cap</option><option value="sunglasses">Sunglasses</option></select>
+<label>Photo</label><input id="photo" type="file" accept="image/*">
+<div class="actions"><button id="cancel">Cancel</button><button id="save">Add</button></div>
+</div></div>
+<script>
+const initial={"tops": [{"id": "T01", "name": "White button-up shirt", "img": "T01.jpg", "kind": "top", "type": "shirt"}, {"id": "T02", "name": "Peach button-up shirt", "img": "T02.jpg", "kind": "top", "type": "shirt"}, {"id": "T03", "name": "Black button-up shirt", "img": "T03.jpg", "kind": "top", "type": "shirt"}, {"id": "T04", "name": "Brown button-up shirt", "img": "T04.jpg", "kind": "top", "type": "shirt"}, {"id": "T05", "name": "Yellow button-up shirt", "img": "T05.jpg", "kind": "top", "type": "shirt"}, {"id": "T06", "name": "Black patterned polo", "img": "T06.jpg", "kind": "top", "type": "polo"}, {"id": "T07", "name": "White patterned polo", "img": "T07.jpg", "kind": "top", "type": "polo"}, {"id": "T08", "name": "Burgundy polo", "img": "T08.jpg", "kind": "top", "type": "polo"}, {"id": "T09", "name": "Beige polo", "img": "T09.jpg", "kind": "top", "type": "polo"}, {"id": "T10", "name": "Teal polo", "img": "T10.jpg", "kind": "top", "type": "polo"}, {"id": "T11", "name": "Dark-green polo", "img": "T11.jpg", "kind": "top", "type": "polo"}, {"id": "T12", "name": "Light-beige polo", "img": "T12.jpg", "kind": "top", "type": "polo"}, {"id": "T13", "name": "Black polo", "img": "T13.jpg", "kind": "top", "type": "polo"}, {"id": "T14", "name": "White polo", "img": "T14.jpg", "kind": "top", "type": "polo"}, {"id": "T15", "name": "Green patterned polo", "img": "T15.jpg", "kind": "top", "type": "polo"}, {"id": "T16", "name": "White/blue patterned T-shirt", "img": "T16.jpg", "kind": "top", "type": "tee"}, {"id": "T17", "name": "Grey T-shirt", "img": "T17.jpg", "kind": "top", "type": "tee"}, {"id": "T18", "name": "Teal long-sleeve T-shirt", "img": "T18.jpg", "kind": "top", "type": "long"}, {"id": "T19", "name": "Green long-sleeve T-shirt", "img": "T19.jpg", "kind": "top", "type": "long"}, {"id": "T20", "name": "Grey long-sleeve T-shirt", "img": "T20.jpg", "kind": "top", "type": "long"}, {"id": "T21", "name": "White graphic T-shirt", "img": "T21.jpg", "kind": "top", "type": "tee"}, {"id": "T22", "name": "Black T-shirt", "img": "T22.jpg", "kind": "top", "type": "tee"}, {"id": "T23", "name": "Green striped long-sleeve T-shirt", "img": "T23.jpg", "kind": "top", "type": "long"}, {"id": "T24", "name": "Green T-shirt", "img": "T24.jpg", "kind": "top", "type": "tee"}, {"id": "T25", "name": "Grey striped long-sleeve T-shirt", "img": "T25.jpg", "kind": "top", "type": "long"}, {"id": "T26", "name": "Black/white long-sleeve T-shirt", "img": "T26.jpg", "kind": "top", "type": "long"}, {"id": "T27", "name": "Light-grey long-sleeve T-shirt", "img": "T27.jpg", "kind": "top", "type": "long"}, {"id": "T28", "name": "Green graphic T-shirt", "img": "T28.jpg", "kind": "top", "type": "tee"}, {"id": "T29", "name": "Purple T-shirt", "img": "T29.jpg", "kind": "top", "type": "tee"}, {"id": "T30", "name": "Red/navy striped long-sleeve T-shirt", "img": "T30.jpg", "kind": "top", "type": "long"}, {"id": "T31", "name": "Black long-sleeve T-shirt", "img": "T31.jpg", "kind": "top", "type": "long"}, {"id": "T32", "name": "Grey long-sleeve T-shirt (2)", "img": "T32.jpg", "kind": "top", "type": "long"}, {"id": "T33", "name": "Dark-green graphic T-shirt", "img": "T33.jpg", "kind": "top", "type": "tee"}, {"id": "T34", "name": "Grey graphic T-shirt", "img": "T34.jpg", "kind": "top", "type": "tee"}, {"id": "T35", "name": "Blue striped polo-style top", "img": "T35.jpg", "kind": "top", "type": "polo"}, {"id": "T36", "name": "Yellow T-shirt", "img": "T36.jpg", "kind": "top", "type": "tee"}, {"id": "T37", "name": "Blue long-sleeve T-shirt", "img": "T37.jpg", "kind": "top", "type": "long"}, {"id": "T38", "name": "Black/white long-sleeve T-shirt (2)", "img": "T38.jpg", "kind": "top", "type": "long"}, {"id": "T39", "name": "Pink T-shirt", "img": "T39.jpg", "kind": "top", "type": "tee"}], "bottoms": [{"id": "B01", "name": "Light-blue pants", "img": "B01.jpg", "kind": "bottom", "type": ""}, {"id": "B02", "name": "Olive cargo pants", "img": "B02.jpg", "kind": "bottom", "type": ""}, {"id": "B03", "name": "Light-blue pants (denim texture)", "img": "B03.jpg", "kind": "bottom", "type": ""}, {"id": "B04", "name": "Light-blue cargo pants", "img": "B04.jpg", "kind": "bottom", "type": ""}, {"id": "B05", "name": "Black pants", "img": "B05.jpg", "kind": "bottom", "type": ""}, {"id": "B06", "name": "White pants", "img": "B06.jpg", "kind": "bottom", "type": ""}, {"id": "B07", "name": "Charcoal jeans", "img": "B07.jpg", "kind": "bottom", "type": ""}, {"id": "B08", "name": "Light-grey pants", "img": "B08.jpg", "kind": "bottom", "type": ""}, {"id": "B09", "name": "Dark-blue pants (jean-like texture)", "img": "B09.jpg", "kind": "bottom", "type": ""}, {"id": "B10", "name": "Beige pants", "img": "B10.jpg", "kind": "bottom", "type": ""}, {"id": "B11", "name": "Grey pants", "img": "B11.jpg", "kind": "bottom", "type": ""}, {"id": "B12", "name": "Olive pants", "img": "B12.jpg", "kind": "bottom", "type": ""}], "shoes": [{"id": "S1", "name": "White/red high-top shoes", "img": "S1.jpg", "kind": "shoe", "type": ""}, {"id": "S2", "name": "Army-green sneakers", "img": "S2.jpg", "kind": "shoe", "type": ""}, {"id": "S3", "name": "Black/white sneakers", "img": "S3.jpg", "kind": "shoe", "type": ""}], "watches": [{"id": "W1", "name": "Silver watch", "img": "W1.jpg", "kind": "watch", "type": ""}, {"id": "W2", "name": "Black watch", "img": "W2.jpg", "kind": "watch", "type": ""}, {"id": "W3", "name": "Brown-strap watch", "img": "W3.jpg", "kind": "watch", "type": ""}], "kadas": [{"id": "A1", "name": "Black kada", "img": "A1.jpg", "kind": "kada", "type": ""}, {"id": "A2", "name": "Colour-bead kada", "img": "A2.jpg", "kind": "kada", "type": ""}, {"id": "A3", "name": "Kada", "img": "A3.jpg", "kind": "kada", "type": ""}], "sunglasses": [{"id": "G1", "name": "Black sunglasses", "img": "G1.jpg", "kind": "sunglasses", "type": ""}, {"id": "G2", "name": "Green-tint sunglasses", "img": "G2.jpg", "kind": "sunglasses", "type": ""}], "caps": [{"id": "C1", "name": "Black Miami cap", "img": "C1.jpg", "kind": "cap", "type": ""}, {"id": "C2", "name": "White Boston College cap", "img": "C2.jpg", "kind": "cap", "type": ""}, {"id": "C3", "name": "Beige cap", "img": "C3.jpg", "kind": "cap", "type": ""}]};
+let w=JSON.parse(JSON.stringify(initial)), mode="top";
+
+function customLoad(){try{let x=JSON.parse(localStorage.getItem("wardrobeCustom")||"{}");for(const k in x)w[k]=(w[k]||[]).concat(x[k])}catch(e){}}
+function customSave(){let x={};for(const k in w){let ids=new Set((initial[k]||[]).map(a=>a.id));let extra=w[k].filter(a=>!ids.has(a.id));if(extra.length)x[k]=extra}localStorage.setItem("wardrobeCustom",JSON.stringify(x))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fill(id,arr){let e=document.getElementById(id);e.innerHTML='<option value="ALL">All</option>'+arr.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")}
+function item(cat,id){return w[cat].find(x=>x.id===id)}
+function piece(x){return x?`<div class="piece"><img loading="lazy" src="${x.img}"><div class="name">${esc(x.name)}</div></div>`:""}
+function render(){
+ fill("top",w.tops);fill("bottom",w.bottoms);fill("shoe",w.shoes);fill("watch",w.watches);fill("kada",w.kadas);
+ let ex=[...w.caps,...w.sunglasses];fill("extra",ex);
+ document.getElementById("tf").style.display=mode==="bottom"?"none":"block";
+ document.getElementById("bf").style.display=mode==="top"?"none":"block";
+ let ts=mode==="bottom"?w.tops:(document.getElementById("top").value==="ALL"?w.tops:[item("tops",document.getElementById("top").value)].filter(Boolean));
+ let bs=mode==="top"?w.bottoms:(document.getElementById("bottom").value==="ALL"?w.bottoms:[item("bottoms",document.getElementById("bottom").value)].filter(Boolean));
+ if(mode==="all"){ts=w.tops;bs=w.bottoms}
+ let s=document.getElementById("shoe").value, wa=document.getElementById("watch").value, ka=document.getElementById("kada").value, exv=document.getElementById("extra").value;
+ let shoes=s==="ALL"?w.shoes:[item("shoes",s)].filter(Boolean), watches=wa==="ALL"?w.watches:[item("watches",wa)].filter(Boolean), kadas=ka==="ALL"?w.kadas:[item("kadas",ka)].filter(Boolean);
+ let extras=[...w.caps,...w.sunglasses], extra=exv==="ALL"?extras:[extras.find(x=>x.id===exv)].filter(Boolean);
+ let combos=[];for(const t of ts)for(const b of bs)combos.push([t,b]);
+ document.getElementById("count").textContent=combos.length+" clothing combination"+(combos.length===1?"":"s");
+ document.getElementById("grid").innerHTML=combos.map((c,i)=>`
+ <div class="card"><h3>Look #${i+1}</h3><div class="line">
+ ${piece(c[0])}<div class="arrow">↓</div>${piece(c[1])}<div class="arrow">↓</div>${piece(shoes[0])}<div class="arrow">↓</div>${piece(watches[0])}${kadas[0]?'<div class="arrow">↓</div>'+piece(kadas[0]):""}${extra[0]?'<div class="arrow">↓</div>'+piece(extra[0]):""}
+ </div><div class="options">Shoes: ${shoes.map(x=>esc(x.name)).join(" • ")}<br>Watches: ${watches.map(x=>esc(x.name)).join(" • ")}<br>Kada: ${kadas.map(x=>esc(x.name)).join(" • ")}</div></div>`).join("");
+}
+function setMode(x){mode=x;document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));document.getElementById(x==="top"?"bt":x==="bottom"?"bb":"ba").classList.add("active");render()}
+document.getElementById("bt").onclick=()=>setMode("top");document.getElementById("bb").onclick=()=>setMode("bottom");document.getElementById("ba").onclick=()=>setMode("all");
+["top","bottom","shoe","watch","kada","extra"].forEach(id=>document.getElementById(id).onchange=render);
+document.getElementById("add").onclick=()=>document.getElementById("modal").classList.add("show");
+document.getElementById("cancel").onclick=()=>document.getElementById("modal").classList.remove("show");
+document.getElementById("save").onclick=()=>{
+ let name=document.getElementById("nm").value.trim(),cat=document.getElementById("cat").value,file=document.getElementById("photo").files[0];
+ if(!name||!file){alert("Enter a name and choose a photo.");return}
+ let r=new FileReader();r.onload=()=>{w[cat].push({id:"custom-"+Date.now(),name,img:r.result});customSave();document.getElementById("modal").classList.remove("show");document.getElementById("nm").value="";document.getElementById("photo").value="";render()};r.readAsDataURL(file)
+};
+customLoad();render();
+</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});</script></body></html>
